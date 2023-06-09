@@ -2,7 +2,7 @@ name: cicd for swagger
 
 on:
   pull_request:
-    branches: [ "prd" ]
+    branches: [ "your branch" ]
 
 jobs:
   build:
@@ -18,7 +18,7 @@ jobs:
 
       - name: zip this project
         run: |
-          zip -r fastapi-server.zip .
+          zip -r 파일명.zip .
 
       - name: SSH SCP Pipeline
         uses: cross-the-world/ssh-scp-ssh-pipelines@latest
@@ -30,10 +30,10 @@ jobs:
           first_ssh: |
             rm -rf /home/${{ secrets.REMOTE_USER }}/swagger
           scp: |
-            ./fastapi-server.zip => /home/${{ secrets.REMOTE_USER }}/swagger
+            ./파일명.zip => /home/${{ secrets.REMOTE_USER }}/swagger
           last_ssh: |
             cd /home/${{ secrets.REMOTE_USER }}/swagger
-            unzip fastapi-server.zip -d /home/${{ secrets.REMOTE_USER }}/swagger
+            unzip 파일명.zip -d /home/${{ secrets.REMOTE_USER }}/swagger
             
             chmod +x delete_server.sh
             ./delete_server.sh
