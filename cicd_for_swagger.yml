@@ -1,0 +1,48 @@
+name: cicd for swagger
+
+on:
+  pull_request:
+    branches: [ "prd" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9"]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: zip this project
+        run: |
+          zip -r fastapi-server.zip .
+
+      - name: SSH SCP Pipeline
+        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          user: ${{ secrets.REMOTE_USER }}
+          pass: ${{ secrets.REMOTE_PASSWORD }}
+          port: ${{ secrets.REMOTE_PORT }}
+          first_ssh: |
+            rm -rf /home/${{ secrets.REMOTE_USER }}/swagger
+          scp: |
+            ./fastapi-server.zip => /home/${{ secrets.REMOTE_USER }}/swagger
+          last_ssh: |
+            cd /home/${{ secrets.REMOTE_USER }}/swagger
+            unzip fastapi-server.zip -d /home/${{ secrets.REMOTE_USER }}/swagger
+            
+            chmod +x delete_server.sh
+            ./delete_server.sh
+            
+            chmod +x start_server.sh
+            ./start_server.sh
+
+      - name: delete zip file
+        run: |
+          rm -rf ./fastapi-server.zip
+
+
